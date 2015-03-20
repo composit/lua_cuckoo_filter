@@ -2,7 +2,7 @@ Lua Cuckoo Filter Library
 -------------------------
 
 ## Overview
-A cuckoo filter replacement for approximate set membership tests with deletion support.
+A bloom filter alternative for approximate set membership tests with deletion support.
 
 ## Installation
 
