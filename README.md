@@ -57,7 +57,9 @@ globally registered and returned by the require function.
 *Arguments*
 - items (unsigned) The maximum number of items to be inserted into the filter
   (must be >= 4). Items are grouped into buckets of four and the number of
-  buckets will be rounded up to the closest power of two if necessary.
+  buckets will be rounded up to the closest power of two if necessary. The
+  fingerprint size is currently fixed at sixteen bits so the false positive rate
+  is 0.00012.
 
 *Return*
 - cuckoo_filter userdata object.
@@ -84,13 +86,28 @@ Returns a string with the running version of cuckoo_filter.
 local added = cf:add(key)
 ```
 
-Adds an item to the cuckoo filter.
+Adds an item to the cuckoo filter. This method works a little differently than
+the standard algorithm; a lookup is performed first. Since we must handle
+duplicates we consider any collision within the bucket to be a duplicate.
 
 *Arguments*
 - key (string/number) The key to add in the cuckoo filter.
 
 *Return*
 - True if the key was added, false if it already existed.
+
+#### delete
+```lua
+local deleted = cf:delete(key)
+```
+
+Deletes an item to the cuckoo filter.
+
+*Arguments*
+- key (string/number) The key to delete in the cuckoo filter.
+
+*Return*
+- True if the key was deleted, false if it didn't exist.
 
 #### query
 ```lua
@@ -116,7 +133,7 @@ Returns the number of items in the cuckoo filter.
 - none
 
 *Return*
-- Returns the number of distinct items added to the set.
+- Returns the number of distinct items currently in the set.
 
 #### clear
 ```lua

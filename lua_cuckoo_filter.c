@@ -315,9 +315,10 @@ static int cf_clear(lua_State* lua)
 
 static int cf_fromstring(lua_State* lua)
 {
-  cuckoo_filter* cf = check_cuckoo_filter(lua, 2);
+  cuckoo_filter* cf = check_cuckoo_filter(lua, 3);
+  cf->cnt = (size_t)luaL_checknumber(lua, 2);
   size_t len = 0;
-  const char* values = luaL_checklstring(lua, 2, &len);
+  const char* values = luaL_checklstring(lua, 3, &len);
   if (len != cf->bytes) {
     luaL_error(lua, "fromstring() bytes found: %d, expected %d", len, cf->bytes);
   }
@@ -344,14 +345,14 @@ serialize_cuckoo_filter(lua_State* lua)
     return 0;
   }
   if (lsb_appendf(output,
-                  "if %s == nil then %s = cuckoo_filter.new(%zu) end\n",
+                  "if %s == nil then %s = cuckoo_filter.new(%u) end\n",
                   key,
                   key,
-                  cf->items)) {
+                  (unsigned)cf->items)) {
     return 1;
   }
 
-  if (lsb_appendf(output, "%s:fromstring(\"", key)) {
+  if (lsb_appendf(output, "%s:fromstring(%u, \"", key, (unsigned)cf->cnt)) {
     return 1;
   }
   if (lsb_serialize_binary(cf->buckets, cf->bytes, output)) return 1;
