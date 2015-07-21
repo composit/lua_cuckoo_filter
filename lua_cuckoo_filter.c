@@ -299,7 +299,7 @@ static int cf_delete(lua_State* lua)
 static int cf_count(lua_State* lua)
 {
   cuckoo_filter* cf = check_cuckoo_filter(lua, 1);
-  lua_pushnumber(lua, cf->cnt);
+  lua_pushnumber(lua, (lua_Number)cf->cnt);
   return 1;
 }
 
