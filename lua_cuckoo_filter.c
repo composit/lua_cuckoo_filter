@@ -338,13 +338,13 @@ static int cf_version(lua_State* lua)
 static int
 serialize_cuckoo_filter(lua_State* lua)
 {
-  lsb_output_data* output = (lsb_output_data*)lua_touserdata(lua, -1);
-  const char* key = (const char*)lua_touserdata(lua, -2);
-  cuckoo_filter* cf = (cuckoo_filter*)lua_touserdata(lua, -3);
-  if (!(output && key && cf)) {
-    return 0;
+  lsb_output_buffer* ob = lua_touserdata(lua, -1);
+  const char* key = lua_touserdata(lua, -2);
+  cuckoo_filter* cf = lua_touserdata(lua, -3);
+  if (!(ob && key && cf)) {
+    return 1;
   }
-  if (lsb_appendf(output,
+  if (lsb_outputf(ob,
                   "if %s == nil then %s = cuckoo_filter.new(%u) end\n",
                   key,
                   key,
@@ -352,11 +352,11 @@ serialize_cuckoo_filter(lua_State* lua)
     return 1;
   }
 
-  if (lsb_appendf(output, "%s:fromstring(%u, \"", key, (unsigned)cf->cnt)) {
+  if (lsb_outputf(ob, "%s:fromstring(%u, \"", key, (unsigned)cf->cnt)) {
     return 1;
   }
-  if (lsb_serialize_binary(cf->buckets, cf->bytes, output)) return 1;
-  if (lsb_appends(output, "\")\n", 3)) {
+  if (lsb_serialize_binary(ob, cf->buckets, cf->bytes)) return 1;
+  if (lsb_outputs(ob, "\")\n", 3)) {
     return 1;
   }
   return 0;

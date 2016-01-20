@@ -3,7 +3,7 @@
 -- file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 require "cuckoo_filter"
-assert(cuckoo_filter.version() == "0.1.0", cuckoo_filter.version())
+assert(cuckoo_filter.version() == "0.2.0", cuckoo_filter.version())
 
 local errors = {
     function() local cf = cuckoo_filter.new(2, 99) end, -- new() incorrect # args
@@ -50,27 +50,28 @@ end
 cf = cuckoo_filter.new(1000000)
 local test_items = 800000
 
+
 -- test numbers
 assert(cf:count() == 0, "cuckoo filter should be empty")
 assert(not cf:query(1), "cuckoo filter should be empty")
 cf:clear()
 for i=1, test_items do
    cf:add(i)
-    if i % 1000000 == 0 then
-        print("add on: " .. i)
-    end
-
 end
 assert(cf:count() == 799987, "count=" .. cf:count())
 
 for i=1, test_items do
     assert(cf:query(i), "query failed " .. i .. " " .. cf:count())
-    if i % 1000000 == 0 then
-        print("query on: " .. i)
-    end
 end
-assert(cf:delete(500000))
-assert(cf:count() == 799986, "count=" .. cf:count())
+
+local dcnt = 0
+for i=1, test_items do
+   if cf:delete(i) then
+       dcnt = dcnt +1
+   end
+end
+assert(dcnt == 799987, "deleted count=" .. dcnt)
+assert(cf:count() == 0, "count=" .. cf:count())
 
 cf:clear()
 assert(cf:count() == 0, "cuckoo filter should be empty")
@@ -80,7 +81,7 @@ assert(not cf:query(1), "cuckoo filter should be empty")
 for i=1, test_items do
     cf:add(tostring(i))
 end
-assert(cf:count() == 799977, "count=" .. cf:count())
+assert(cf:count() == 799977, "count=" .. cf:count()) -- lower acuracy is expected since the string only use 0-9
 
 for i=1, test_items do
     assert(cf:query(tostring(i)), "query failed")
